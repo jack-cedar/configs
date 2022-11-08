@@ -8,12 +8,10 @@ Set up bash profile to source bashrc
 #+end_src
 
 * env
-** path
 #+begin_src shell :tangle ~/.bashrc :shebang #!/bin/bash
   export PATH="$PATH:$HOME/.local/bin/"
 #+end_src 
 
-** other
 #+begin_src shell :tangle ~/.bashrc
   export EDITOR="emacsclient -c -a 'emacs'"
 #+end_src
