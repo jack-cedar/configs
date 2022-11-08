@@ -1,0 +1,226 @@
+#+TITLE: My Emacs Config
+#+AUTHOR: Jack Cedar Janousek-Weaver
+
+#+PROPERTY: header-args:emacs-lisp :tangle ./.emacs.d/init.el :mkdirp yes
+
+* Package Managment
+Bootstraps Straight.el for package management
+then installs use-package for more control over package configuration 
+#+begin_src emacs-lisp
+  ;; Bootstraps 
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+	(bootstrap-version 6))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+	  (url-retrieve-synchronously
+	   "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+	   'silent 'inhibit-cookies)
+	(goto-char (point-max))
+	(eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+  ;; use-package
+  (straight-use-package 'use-package)
+#+end_src
+
+* UI Stuff
+** Fonts
+#+begin_src emacs-lisp
+   (set-face-attribute  'default nil
+  		      :font "Iosevka 15"
+  		      :weight 'medium)
+  (add-to-list 'default-frame-alist
+             '(font . "Iosevka-15"))
+#+end_src
+
+** Themes
+#+begin_src emacs-lisp
+  (use-package doom-themes :straight t)
+  (setq doom-themes-enable-bold t
+	doom-themes-enable-italic t)
+  (load-theme 'doom-tokyo-night t)
+#+end_src
+
+** Misc
+#+begin_src emacs-lisp
+  ;; Line Numbers
+  (column-number-mode)
+  (global-display-line-numbers-mode t)
+  (dolist(mode '( eshell-mode-hook
+		  term-mode-hook
+		  vterm-mode-hook
+		  shell-mode-hook
+		  org-mode-hook))
+    (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
+  ;; Mode Line
+  (use-package mood-line :straight t)
+  (mood-line-mode)
+  ;; icons
+  (use-package all-the-icons :straight t)
+  (use-package all-the-icons-dired :straight t
+    :config (setq all-the-icons-dired-monochrome nil))
+  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+
+#+end_src
+
+* Inital Startup
+#+begin_src emacs-lisp
+  (setq inhibit-startup-message t)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
+  (set-fringe-mode 15)
+  (recentf-mode 1)
+  (setq use-dialog-box nil)
+  (global-auto-revert-mode t)
+  (setq global-auto-revert-non-file-buffers t)
+
+  ;; Backup Dir
+  (setq backup-directory-alist
+	  `((".*" . ,temporary-file-directory)))
+
+#+end_src
+
+* Key Bindings
+#+begin_src emacs-lisp
+  ;; multi cursors
+  (use-package multiple-cursors :straight t)
+  (define-key global-map (kbd "M-n") 'mc/skip-to-next-like-this)
+
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+  (use-package general :straight t)
+  (general-create-definer jc/leader-keys
+    :prefix "C-SPC")
+  (general-auto-unbind-keys)
+
+  (jc/leader-keys
+    "ms" 'set-mark-command
+    "mm" 'transient-mark-mode
+    "mj" 'exchange-point-and-mark
+    "t" 'org-babel-tangle
+    "c" 'org-capture
+    "i" 'imenu
+    ";" 'er/expand-region)
+#+end_src
+
+
+* Programming
+This Section Contains Configurations Relating To Coding
+** Modes
+This Is where i install various modes for different programming languages
+#+begin_src emacs-lisp
+  (dolist (mode '( haskell-mode
+		   rust-mode
+		   zig-mode
+		   nim-mode
+		   go-mode))
+    (straight-use-package mode))
+
+#+end_src
+
+** Lisp
+This section is pretty self explanatory.
+it contains packages and configs related to programming in lisp
+#+begin_src emacs-lisp
+  (use-package sly :straight t)
+  (setq inferior-lisp-program "sbcl")
+
+  (use-package geiser :straight t)
+  (use-package geiser-guile :straight t)
+  (use-package geiser-chez :straight t)
+  (use-package smartparens :straight t)
+  (require 'smartparens-config)
+  (smartparens-global-mode)
+  (straight-use-package 'rainbow-delimiters)
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+#+end_src
+
+** Version Control
+Various Configs and packages i use for version control while developing
+#+begin_src emacs-lisp
+  (use-package magit :straight t)
+
+#+end_src
+
+* Completion
+ * Vertico provides a vertical completion UI
+ * Marginalia adds annotation to completion canidates
+ * Orderless expands the matching capabilities of completions
+#+begin_src emacs-lisp
+  ;; Vertico
+  (use-package vertico :straight t)
+  (vertico-mode)
+
+  ;; Marginalina
+  (use-package marginalia :straight t)
+  (marginalia-mode)
+
+  ;; Orderless
+  (use-package orderless :straight t)
+  (setq completion-styles '(orderless basic))
+  (setq completion-category-overrides '((file (styles basic partial-completion))))
+#+end_src
+
+** Corfu
+Corfu provides completion popups
+#+begin_src emacs-lisp
+  (use-package corfu
+    :straight t
+    :custom
+    (corfu-cycle t)
+    (corfu-auto t)
+    (corfu-auto-prefix 2)
+    (corfu-auto-delay 0.0)
+    :init 
+    (global-corfu-mode))
+
+#+end_src
+
+* Org Mode
+** Basic
+#+begin_src emacs-lisp
+  (use-package org :straight t)
+  (require 'org-tempo)
+  (use-package org-modern :straight t)
+  (global-org-modern-mode)
+#+end_src
+
+** Notes
+#+begin_src emacs-lisp
+  (use-package denote
+    :straight t
+    :custom
+    (denote-directory "~/vault/nexus"))
+
+  (with-eval-after-load 'org-capture
+    (add-to-list 'org-capture-templates
+		 '("n" "Create New Note (Denote)" plain
+		   (file denote-last-path)
+		   #'denote-org-capture
+		   :no-save t
+		   :immediate-finish nil
+		   :kill-buffer t
+		   :jump-to-captured t)))
+
+#+end_src
+** Babel
+#+begin_src emacs-lisp
+  (setq org-babel-lisp-eval-fn #'sly-eval)
+  (org-babel-do-load-languages
+   'org-babel-load-languages '((C . t)
+			       (lisp . t)))
+#+end_src
+
+
+* Misc Packages
+Variety of packages that i couldnt quite fit into other categories
+#+begin_src emacs-lisp
+  (use-package pdf-tools :straight t)
+  ;;(use-package expand-region :straight t)
+  (use-package yasnippet :straight t)
+#+end_src 
+
+
