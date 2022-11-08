@@ -1,0 +1,13 @@
+
+
+** tangle-all
+this will tangle all org files in the current directory
+it is meant to be a helper fuction that i manually evaluate to setup my configs
+#+begin_src emacs-lisp :tangle ~/.emacs.d/myfuncs.el
+  (defun jc/tangle-all ()
+    ;; tangle all org files in current directory
+    (interactive)
+    (mapcar (lambda (file)
+	      (org-babel-tangle-file file))
+	    (split-string (shell-command-to-string "find $(pwd) -name \"*.org\""))))
+#+end_src

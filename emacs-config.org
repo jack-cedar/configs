@@ -1,7 +1,7 @@
 #+TITLE: My Emacs Config
 #+AUTHOR: Jack Cedar Janousek-Weaver
 
-#+PROPERTY: header-args:emacs-lisp :tangle ./.emacs.d/init.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle ~/.emacs.d/init.el :mkdirp yes
 
 * Package Managment
 Bootstraps Straight.el for package management
