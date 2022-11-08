@@ -17,7 +17,6 @@ Set up bash profile to source bashrc
 #+end_src
 
 * prompt
-the prompt is separated into a top and bottom section
 #+begin_src shell :tangle ~/.bashrc
   PS1="\[\033[1;31m\] [\u@\h]\[\033[1;33m\] <\d at \t>\n\[\033[1;32m\] in: \[\033[1;35m\]{ \w }\[\033[1;34m\] >> \[\033[00m\]"
 #+end_src
